@@ -1,11 +1,9 @@
 package queues;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-//import edu.princeton.cs.algs4.*;
-//import edu.rice.cs.drjava.*;
+
 
 public class Deque<Item> implements Iterable<Item> {
 	private Item []stored;
@@ -19,7 +17,7 @@ public class Deque<Item> implements Iterable<Item> {
 		return first==last;
 	}                 // is the deque empty?
 	public int size() {
-		int size=first-last;
+		int size=last-first;
 		if(size<0)
 			return size+stored.length;
 		else {
@@ -37,21 +35,26 @@ public class Deque<Item> implements Iterable<Item> {
 			throw new NullPointerException("add null item!");
 		if(size()==stored.length)
 			resize(2*stored.length);
-		stored[--first]=item;
+		if(--first<0)
+			first=stored.length-1;
+		stored[first]=item;
 	}          // add the item to the front
 	public void addLast(Item item){
 		if(item==null)
 			throw new NullPointerException("add null item!");
 		if(size()==stored.length)
 			resize(2*stored.length);
-		stored[++last]=item;
+		if(++last>=stored.length)
+			last=0;
+		stored[last]=item;
 	}           // add the item to the end
 	public Item removeFirst(){
 		if(size()==0)
 			throw new NoSuchElementException("remove from a null deque!"); 
 		Item item=stored[first];
 		stored[first]=null;
-		first++;
+		if(++first>=stored.length)
+			first=0;
 		if(size()==stored.length/4)
 			resize(stored.length/2);
 		return item;
@@ -61,7 +64,8 @@ public class Deque<Item> implements Iterable<Item> {
 			throw new NoSuchElementException("remove from a null deque!"); 
 		Item item=stored[last];
 		stored[last]=null;
-		last--;
+		if(--last<0)
+			last=stored.length-1;
 		if(size()==stored.length/4)
 			resize(stored.length/2);
 		return item;
@@ -72,6 +76,8 @@ public class Deque<Item> implements Iterable<Item> {
 	private class DequeItrator implements Iterator<Item>{
 		private int i=first;
 		public boolean hasNext(){
+			if(i==stored.length-1)
+				i=-1;
 			return stored[++i]!=null;
 		}
 		public void remove() {
@@ -80,6 +86,8 @@ public class Deque<Item> implements Iterable<Item> {
 		public Item next() {
 			if(first==last)
 				throw new NoSuchElementException("no more item to iterate");
+			if(i==stored.length-1)
+				i=-1;
 			return stored[++i];
 		}
 	}
