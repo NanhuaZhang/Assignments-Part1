@@ -1,8 +1,6 @@
-package queues;
+//package queues;
 
 import edu.princeton.cs.algs4.StdOut;
-import org.junit.Test;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -72,17 +70,16 @@ public class Deque<Item> implements Iterable<Item> {
 		return item;
 	}                // remove and return the item from the front
 	public Item removeLast(){
-		if(size()==0)
+		if(isEmpty())
 			throw new NoSuchElementException("remove from a null deque!");
 		if(size()==stored.length/4)
             resize(stored.length/2);
-		Item item=stored[last];
-		stored[last]=null;
 		if (last==0)
 		    last=stored.length-1;
-
 		else
 		    last=(last-1)%stored.length;
+		Item item=stored[last];
+		stored[last]=null;
 		return item;
 	}                 // remove and return the item from the end
 	public Iterator<Item> iterator(){
@@ -91,33 +88,44 @@ public class Deque<Item> implements Iterable<Item> {
 	private class DequeItrator implements Iterator<Item>{
 		private int i=first;
 		public boolean hasNext(){
-			if(i==stored.length-1)
-				i=-1;
-			return stored[++i]!=null;
+		    if(i>last) {
+                return i>last;
+            }
+            if (i==stored.length-1 && first!=0){
+		        return true;
+            }
+            return i<last;
 		}
 		public void remove() {
 			throw new UnsupportedOperationException("not support remove function!");
 		}
 		public Item next() {
-			if(first==last)
+			if(!hasNext())
 				throw new NoSuchElementException("no more item to iterate");
-			if(i==stored.length-1)
-				i=-1;
-			return stored[++i];
+            Item item = stored[i];
+            i = (i+1) % stored.length;
+            return item;
 		}
 	}
 	public static void main(String[] args){
 //		Deque <String> d =new Deque<String>();
-//		d.addFirst("A");
-//		d.addFirst("B");
-//		d.addFirst("C");
+////		d.addFirst("C");
 //		d.addLast("D");
-//		d.addLast("E");
-//		d.addLast("F");
-//		d.removeFirst();
-//        StdOut.print(d.size());
-//		d.removeLast();
-//        StdOut.print(d.size());
+////        d.addFirst("B");
+////		d.addLast("E");
+////        d.addFirst("A");
+//////		d.addLast("F");
+//        Iterator iterator=d.iterator();
+//        int length=0;
+//        while(iterator.hasNext()){
+//            length++;
+//            StdOut.print(iterator.next());
+//        }
+//        StdOut.print(length);
+////		d.removeFirst();
+////        StdOut.print(d.size());
+////		d.removeLast();
+////        StdOut.print(d.size());
 
 	}  // unit testing (optional)
 }

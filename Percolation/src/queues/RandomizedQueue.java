@@ -1,11 +1,10 @@
 package queues;
 
-import java.security.PublicKey;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
-import edu.rice.cs.plt.tuple.Null;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
 	private class Node{
@@ -23,7 +22,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	public RandomizedQueue(){
 		first=new Node();
 		last=new Node();
-		first=last=null;
+		first=null;
+		last=null;
 //		 head=null;
 	}                 // construct an empty randomized queue
 	public boolean isEmpty(){
@@ -42,6 +42,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 		return count;
 	}                        // return the number of items on the queue
 	public void enqueue(Item item){
+        if(item==null)
+            throw new NullPointerException () ;
 	    if(isEmpty())
 	        first=last=new Node(item);
 	    else {
@@ -52,7 +54,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	}           // add the item
 	private Node random() {
 		if(isEmpty())
-			return null;
+			throw new NoSuchElementException() ;
 		if(size()==1)
 			return first;
 		int randomNum=StdRandom.uniform(size());
@@ -69,16 +71,31 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	public Item dequeue(){
 		Node qNode=random();
 		Item item;
+		if (size()==1) {
+            item = first.item;
+            first=null;
+            last=null;
+            return item;
+        }
 		if(qNode==first){
-			first=last=null;
-			item=first.item;
+            item=first.item;
+            first=first.next;
+			qNode=null;
 		}
 		else{
-			Node pNode=qNode.next;
-			qNode.next=pNode.next;
-			item=pNode.item;
-			pNode=null;
-		}
+            item = qNode.item;
+            Node pNode = first;
+            while (pNode.next != qNode)
+                pNode = pNode.next;
+            if(qNode.next==null) {
+                qNode = null;
+                last = pNode;
+            }
+            else {
+                pNode.next=qNode.next;
+                qNode=null;
+            }
+        }
 		return item;
 	}                    // remove and return a random item
 	public Item sample(){
@@ -94,22 +111,35 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 	private class RandomizedQueueIterator implements Iterator<Item>{
 		Node current=first;
 		public boolean hasNext(){
-			return current!=null;
+            return current!=null;
 		}
 		public void remove() {
 			throw new UnsupportedOperationException("not support remove function!");
 		}
 		public Item next() {
+		    if (!hasNext())
+		        throw new NoSuchElementException();
 			Item item=current.item;
 			current=current.next;
 			return item;
 		}
 	}
 	public static void main(String[] args){
-		RandomizedQueue<String> r=new RandomizedQueue<String>();
-		r.enqueue("A");
-		r.enqueue("B");
-		r.enqueue("C");
-		StdOut.print(r.sample());
+//		RandomizedQueue<String> r=new RandomizedQueue<String>();
+//		r.enqueue("A");
+////		r.dequeue();
+////		r.isEmpty();
+//		r.enqueue("B");
+////        StdOut.print(r.size());
+//		r.enqueue("C");
+//
+//        Iterator iterator=r.iterator();
+//        int length=0;
+//        while(iterator.hasNext()){
+//            length++;
+//            StdOut.print(iterator.next());
+//        }
+//        StdOut.print(length);
+//		StdOut.print(r.sample());
 	}   // unit testing (optional)
 	}
