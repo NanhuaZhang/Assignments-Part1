@@ -1,5 +1,8 @@
 package queues;
 
+import edu.princeton.cs.algs4.StdOut;
+import org.junit.Test;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -12,22 +15,31 @@ public class Deque<Item> implements Iterable<Item> {
 	public Deque(){
 		   stored=(Item[])new Object[1];
 		   first=last=0;
+		   stored[first]=null;
 	   }                           // construct an empty deque
 	public boolean isEmpty(){
-		return first==last;
+		return first==last && stored[first]==null && stored[last]==null;
 	}                 // is the deque empty?
 	public int size() {
-		int size=last-first;
-		if(size<0)
-			return size+stored.length;
-		else {
-			return size;
-		}
+        int newTail = last;
+        if (first == last && stored[first] != null) {
+            return stored.length;
+        }
+        if (last < first) {
+            newTail = stored.length + last;
+        }
+        return newTail - first;
 	}                       // return the number of items on the deque
 	private void resize(int capacity) {
 		Item []copy=(Item[])new Object[capacity];
-		for(int i=0;i<stored.length;++i)
-			copy[i]=stored[i];
+        int size=size();
+        if (first>=last){
+            last=stored.length+last;
+        }
+		for(int i=first;i<last;++i)
+			copy[i-first]=stored[i%stored.length];
+		first=0;
+		last=size;
 		stored=copy;
 	}
 	public void addFirst(Item item){
@@ -35,8 +47,10 @@ public class Deque<Item> implements Iterable<Item> {
 			throw new NullPointerException("add null item!");
 		if(size()==stored.length)
 			resize(2*stored.length);
-		if(--first<0)
-			first=stored.length-1;
+		if (first==0)
+		    first=stored.length-1;
+		else
+		    first=(first-1)%stored.length;
 		stored[first]=item;
 	}          // add the item to the front
 	public void addLast(Item item){
@@ -44,30 +58,31 @@ public class Deque<Item> implements Iterable<Item> {
 			throw new NullPointerException("add null item!");
 		if(size()==stored.length)
 			resize(2*stored.length);
-		if(++last>=stored.length)
-			last=0;
 		stored[last]=item;
+		last=(last+1)%stored.length;
 	}           // add the item to the end
 	public Item removeFirst(){
 		if(size()==0)
-			throw new NoSuchElementException("remove from a null deque!"); 
+			throw new NoSuchElementException("remove from a null deque!");
+        if(size()==stored.length/4)
+            resize(stored.length/2);
 		Item item=stored[first];
 		stored[first]=null;
-		if(++first>=stored.length)
-			first=0;
-		if(size()==stored.length/4)
-			resize(stored.length/2);
+        first=(first+1)%stored.length;
 		return item;
 	}                // remove and return the item from the front
 	public Item removeLast(){
 		if(size()==0)
-			throw new NoSuchElementException("remove from a null deque!"); 
+			throw new NoSuchElementException("remove from a null deque!");
+		if(size()==stored.length/4)
+            resize(stored.length/2);
 		Item item=stored[last];
 		stored[last]=null;
-		if(--last<0)
-			last=stored.length-1;
-		if(size()==stored.length/4)
-			resize(stored.length/2);
+		if (last==0)
+		    last=stored.length-1;
+
+		else
+		    last=(last-1)%stored.length;
 		return item;
 	}                 // remove and return the item from the end
 	public Iterator<Item> iterator(){
@@ -92,6 +107,17 @@ public class Deque<Item> implements Iterable<Item> {
 		}
 	}
 	public static void main(String[] args){
-		
+//		Deque <String> d =new Deque<String>();
+//		d.addFirst("A");
+//		d.addFirst("B");
+//		d.addFirst("C");
+//		d.addLast("D");
+//		d.addLast("E");
+//		d.addLast("F");
+//		d.removeFirst();
+//        StdOut.print(d.size());
+//		d.removeLast();
+//        StdOut.print(d.size());
+
 	}  // unit testing (optional)
 }
